@@ -1,0 +1,29 @@
+steps:
+### Deployment by adapt
+  - id: 'pre-deploy'
+    name: 'gcr.io/cloud-builders/gcloud'
+    env:
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - | 
+          npm install -g @adpt/cli
+          gcloud container clusters get-credentials wardah-af-autopilot --zone europe-west2
+          gcloud auth configure-docker --quiet
+          export KUBE_DOCKER_REPO=gcr.io/devops3-analiza
+          
+# Run Adapt
+  - id: 'deploy'
+    name: 'gcr.io/devops3-analiza'
+    entrypoint: 'adapt' 
+    env: 
+    - 'KUBECONFIG=gcr.io/devops3-analiza'
+    - 'KUBE_DOCKER_REPO=gcr.io/devops3-analiza'
+    # args: ['run','k8s-test','--deployID','wardah-af-movieapp-prod-test']
+    args: ['update','wardah-af-movieapp-prod-test']
+    dir: 'deploy'
+             
+## Timeout
+timeout: "1600s"
+options:
+ logging: CLOUD_LOGGING_ONLY
